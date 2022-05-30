@@ -3,7 +3,7 @@ import discord
 import logging
 
 
-class AdminBot(discord.Bot):f
+class AdminBot(discord.Bot):
     def __init__(self, *args, **options):
         super().__init__(*args, **options)
 
