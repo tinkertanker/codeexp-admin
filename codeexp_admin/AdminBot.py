@@ -8,4 +8,12 @@ class AdminBot(discord.Bot):
         super().__init__(*args, **options)
 
     def _setup_logging(self):
-        pass
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger('adminbot')
+        self.logger = logger
+
+    def log(self, msg):
+        self.logger.info(msg)
+
+    async def on_ready(self):
+        self.log(f"Logged in as {self.user}")
