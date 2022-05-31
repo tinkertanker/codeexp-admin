@@ -6,22 +6,47 @@ from discord.ext import commands
 from codeexp_admin import AdminBot
 
 
-async def add_groups(ctx: discord.ApplicationContext, category_id: int, num_groups: int = 1):
+def get_categories(guild: discord.Guild) -> list[discord.CategoryChannel]:
+    category_channels = filter(lambda chan: isinstance(chan, discord.CategoryChannel), guild.channels)
+    return list(category_channels)
+
+
+def get_managed_category_channels(guild: discord.Guild) -> list[discord.CategoryChannel]:
+    category_channels = get_categories(guild)
+
     def check_is_valid_category(category: discord.CategoryChannel):
         return "category" in category.name.lower()
 
+    managed_categories = filter(check_is_valid_category, category_channels)
+    return list(managed_categories)
+
+
+def get_managed_channel_ids(guild: discord.Guild) -> list[tuple[int, int, discord.CategoryChannel]]:
     def convert_to_id(category: discord.CategoryChannel):
         subcategory = category.name.split(" ")[1]
         cat_num_and_sub = subcategory.split("-")
-        return int(cat_num_and_sub[0]), int(cat_num_and_sub[1])
+        return int(cat_num_and_sub[0]), int(cat_num_and_sub[1]), category
 
-    category_channels = filter(lambda ch: isinstance(ch, discord.CategoryChannel), ctx.guild.channels)
+    managed_channels = get_managed_category_channels(guild)
+    return list(map(convert_to_id, managed_channels))
 
-    managed_categories = filter(check_is_valid_category, category_channels)
-    managed_channels = map(convert_to_id, managed_categories)
-    valid_ids = map(lambda x: x[0], managed_channels)
-    if category_id not in valid_ids:
-        await ctx.respond(f"Invalid category ID. Valid IDs: {valid_ids}")
+
+def build_managed_categories_lookup_table(managed_channels: list[tuple[int, int, discord.CategoryChannel]]) -> dict:
+    lookup_table = {}
+    for (cat_num, subcat_num, chan) in managed_channels:
+        if cat_num not in lookup_table:
+            lookup_table[cat_num] = []
+        lookup_table[cat_num].append((subcat_num, chan))
+    return lookup_table
+
+
+async def add_groups(ctx: discord.ApplicationContext, category_id: int, num_groups: int = 1):
+    sub_ids = build_managed_categories_lookup_table(get_managed_channel_ids(ctx.guild))
+    if category_id not in [*sub_ids.keys()]:
+        await ctx.respond(f"Invalid category ID. Valid IDs: {[*sub_ids.keys()]}", ephemeral=True)
+        return
+    # await ctx.respond(sub_ids, ephmeral=True)
+    status_msg = await ctx.respond("Working", ephemeral=True)
 
 
 class GroupManagement(commands.Cog):
@@ -52,35 +77,13 @@ class GroupManagement(commands.Cog):
                            num_groups: discord.Option(discord.SlashCommandOptionType.integer,
                                                       "The number of groups to create")):
 
-        category_channels = filter(lambda channel: isinstance(channel, discord.CategoryChannel), ctx.guild.channels)
-
-        await ctx.respond([str(c) for c in category_channels], ephemeral=True)
-        await add_groups(ctx, category_id, num_groups)
-        return
-        if not isinstance(cat, discord.CategoryChannel):
-            await ctx.respond("Weird bug (not a category channel)", ephemeral=True)
-            return
         if num_groups and num_groups < 2:
             await ctx.respond("Does not make sense", ephemeral=True)
             return
         if not num_groups:
             num_groups = 1
 
-        status_msg = await ctx.respond("Working", ephemeral=True)
-
-        channel_nums = [int(chan.name.split("-")[-1]) for chan in cat.channels]
-        last_channel = 0
-        if len(channel_nums) >= 50:
-            self.bot.log("Too many channels in the category")
-            await status_msg.edit_original_message(content="Cannot do this, too many channels in this category")
-            return
-        if len(channel_nums) > 0:
-            last_channel = sorted(channel_nums)[-1]
-
-        for x in range(1, num_groups + 1):
-            await cat.create_text_channel(f"group-{last_channel + x}")
-            await cat.create_voice_channel(f"group-voice-{last_channel + x}")
-            await status_msg.edit_original_message(content=f"Working on group {last_channel + x}")
+        await add_groups(ctx, int(category_id), num_groups)
 
 
 def setup(bot: AdminBot):
