@@ -68,6 +68,8 @@ async def create_managed_channels(guild: discord.Guild, category: int, num_chann
                  channel_number, linked_role_id) VALUES (?, ?, ?, ?, ?, ?) 
                                 """, (chan.id, group_name, 'voice', category, last_group_num + i + 1, role.id))
                 engine.connection.commit()
+    if update_message:
+        await update_message.edit_original_message(content=f"Created {num_channels} channels")
 
 
 async def delete_managed_channels(guild: discord.Guild, category: int,

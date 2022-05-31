@@ -15,7 +15,8 @@ class GroupManagement(commands.Cog):
     async def delete_all(self, ctx: discord.ApplicationContext,
                          category_id: discord.Option(choices=['0', '1'], description="Category ID")):
         update_msg = await ctx.respond("Now working...", ephemeral=True)
-        await delete_managed_channels(ctx.guild, int(category_id), update_message=update_msg)
+        await delete_managed_channels(ctx.guild, int(category_id), update_message=update_msg,
+                                      engine=self.bot.sqlite_engine)
         await update_msg.edit_original_message(content=f"Deleted all managed channels in category {category_id}")
 
     @commands.slash_command(name="create_group", description="Creates a group")
