@@ -21,15 +21,14 @@ class GroupManagement(commands.Cog):
 
     @commands.slash_command(name="create_group", description="Creates a group")
     async def create_group(self, ctx: discord.ApplicationContext,
-                           category_id: discord.Option(choices=['0', '1'], description="The category ID"),
+                           category_id: discord.Option(choices=['0', '1'],  # TODO: do not hardcode choices
+                                                       description="The category ID"),
                            num_groups: discord.Option(discord.SlashCommandOptionType.integer,
                                                       "The number of groups to create")):
 
-        if num_groups and num_groups < 1:
+        if num_groups < 1:
             await ctx.respond("Does not make sense", ephemeral=True)
             return
-        if not num_groups:
-            num_groups = 1
         update_msg = await ctx.respond("Now working...", ephemeral=True)
         await create_managed_channels(ctx.guild, int(category_id), num_groups, update_message=update_msg,
                                       engine=self.bot.sqlite_engine)
