@@ -80,7 +80,7 @@ async def delete_managed_channels(guild: discord.Guild, category: int,
     managed_roles = get_managed_roles(guild, category)
     for channel in managed_chans:
         if update_message:
-            await update_message.edit_original_message(content=f"Deleting {channel.name}")
+            await update_message.edit_original_message(content=f"Deleting channel {channel.name}")
         await channel.delete()
         engine.cursor.execute("""
         DELETE FROM channel_store WHERE discord_channel_id = ?
@@ -89,5 +89,5 @@ async def delete_managed_channels(guild: discord.Guild, category: int,
 
     for role in managed_roles:
         if update_message:
-            await update_message.edit_original_message(content=f"Deleting {role.name}")
+            await update_message.edit_original_message(content=f"Deleting role {role.name}")
         await role.delete()

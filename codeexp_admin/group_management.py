@@ -25,7 +25,7 @@ class GroupManagement(commands.Cog):
                            num_groups: discord.Option(discord.SlashCommandOptionType.integer,
                                                       "The number of groups to create")):
 
-        if num_groups and num_groups < 2:
+        if num_groups and num_groups < 1:
             await ctx.respond("Does not make sense", ephemeral=True)
             return
         if not num_groups:
