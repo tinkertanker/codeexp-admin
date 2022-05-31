@@ -10,6 +10,31 @@ class UserAutoAssignment(commands.Cog):
     def __init__(self, bot: AdminBot):
         self.bot = bot
 
+    @commands.slash_command(name="usermod", description="Joins a group")
+    async def join_group(self, ctx: discord.ApplicationContext,
+                         category: discord.Option(choices=['0', '1'],  # future: don't hardcode
+                                                  description="The category"),
+                         group_num: discord.Option(discord.SlashCommandOptionType.integer,
+                                                   description="The group number")
+                         ):
+        if group_num < 1:
+            await ctx.respond("Does not make sense", ephemeral=True)
+            return
+        role_id = self.bot.sqlite_engine.cursor.execute("""
+                SELECT linked_role_id FROM channel_store WHERE category_id = ? AND channel_number = ?""",
+                                                        (category, group_num)).fetchone()
+        if role_id is None:
+            await ctx.respond("The role does not exist", ephemeral=True)
+            return
+        role_id = role_id[0]
+        the_role = ctx.guild.get_role(role_id)
+        if the_role is None:
+            await ctx.respond("Cache error, please contact the developers", ephemeral=True)
+            return
+        usr: discord.Member = ctx.author
+        await ctx.respond(f"Joining {str(usr)} {the_role.name}", ephemeral=True)
+        await usr.add_roles(the_role, reason=f"codeexp_admin: User {ctx.author} added as group member")
+
     @commands.slash_command(name="mentor", description="Assigns a user to be a mentor")
     @commands.has_permissions(manage_channels=True)
     async def mentor(self, ctx: discord.ApplicationContext,
