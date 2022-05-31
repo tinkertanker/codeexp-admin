@@ -60,6 +60,7 @@ async def create_managed_channels(guild: discord.Guild, category: int, num_chann
                  channel_number, linked_role_id)  VALUES (?, ?, ?, ?, ?, ?) 
                 """, (chan.id, group_name, 'text', category, last_group_num + i + 1, role.id))
                 engine.connection.commit()
+                await chan.set_permissions(role, view_channel=True, reason="Created by codeexp_admin")
 
             elif gtype == "vcgrp":
                 chan = await guild.create_voice_channel(group_name)
@@ -68,6 +69,7 @@ async def create_managed_channels(guild: discord.Guild, category: int, num_chann
                  channel_number, linked_role_id) VALUES (?, ?, ?, ?, ?, ?) 
                                 """, (chan.id, group_name, 'voice', category, last_group_num + i + 1, role.id))
                 engine.connection.commit()
+                await chan.set_permissions(role, view_channel=True, reason="Created by codeexp_admin")
     if update_message:
         await update_message.edit_original_message(content=f"Created {num_channels} channels")
 
