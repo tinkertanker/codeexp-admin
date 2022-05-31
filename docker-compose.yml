@@ -1,13 +1,11 @@
 version: '3.7'
 services:
-    redis:
-        container_name: redis
-        image: redis:alpine
-        restart: unless-stopped
     admin_bot:
         container_name: admin_bot
         image: tk/code-exp-admin-bot:latest
         build:
             context: .
             dockerfile: Dockerfile
+        volumes:
+            - ./:/app
         restart: unless-stopped
