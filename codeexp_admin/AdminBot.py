@@ -35,3 +35,5 @@ class AdminBot(discord.Bot):
 
     async def on_ready(self):
         self.log(f"Logged in as {self.user}")
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
+                                                             name="for infractions"))
