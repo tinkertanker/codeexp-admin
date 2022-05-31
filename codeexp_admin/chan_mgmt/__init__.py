@@ -56,31 +56,17 @@ async def create_managed_channels(guild: discord.Guild, category: int, num_chann
             if gtype == "txtgrp":
                 chan = await guild.create_text_channel(group_name)
                 engine.cursor.execute("""
-                INSERT INTO channel_store VALUES (?, ?, ?, ?, ?, ?) 
-                """,
-                                      [
-                                          ("discord_channel_id", chan.id),
-                                          ("discord_channel_name", group_name),
-                                          ("channel_type", "text"),
-                                          ("category_id", category),
-                                          ("channel_number", last_group_num + i + 1),
-                                          ("linked_role_id", role.id)
-                                      ])
+                INSERT INTO channel_store (discord_channel_id, discord_channel_name, channel_type, category_id,
+                 channel_number, linked_role_id)  VALUES (?, ?, ?, ?, ?, ?) 
+                """, (chan.id, group_name, 'text', category, last_group_num + i + 1, role.id))
                 engine.connection.commit()
 
             elif gtype == "vcgrp":
                 chan = await guild.create_voice_channel(group_name)
                 engine.cursor.execute("""
-                                INSERT INTO channel_store VALUES (?, ?, ?, ?, ?, ?) 
-                                """,
-                                      [
-                                          ("discord_channel_id", chan.id),
-                                          ("discord_channel_name", group_name),
-                                          ("channel_type", "voice"),
-                                          ("category_id", category),
-                                          ("channel_number", last_group_num + i + 1),
-                                          ("linked_role_id", role.id)
-                                      ])
+                                INSERT INTO channel_store (discord_channel_id, discord_channel_name, channel_type, category_id,
+                 channel_number, linked_role_id) VALUES (?, ?, ?, ?, ?, ?) 
+                                """, (chan.id, group_name, 'voice', category, last_group_num + i + 1, role.id))
                 engine.connection.commit()
 
 

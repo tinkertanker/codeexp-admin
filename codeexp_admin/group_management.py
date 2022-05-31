@@ -30,9 +30,8 @@ class GroupManagement(commands.Cog):
         if not num_groups:
             num_groups = 1
         update_msg = await ctx.respond("Now working...", ephemeral=True)
-        await create_managed_channels(ctx.guild, int(category_id), num_groups, update_message=update_msg)
-
-
+        await create_managed_channels(ctx.guild, int(category_id), num_groups, update_message=update_msg,
+                                      engine=self.bot.sqlite_engine)
 
 
 def setup(bot: AdminBot):
