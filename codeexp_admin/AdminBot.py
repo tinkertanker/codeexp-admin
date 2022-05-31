@@ -1,8 +1,11 @@
+import os
 from collections import namedtuple
 
 # noinspection PyPackageRequirements
 import discord
 import logging
+
+from codeexp_admin.sqlite_engine import SqliteEngine
 
 Config = namedtuple("Config", ["token", "guild"])
 
@@ -15,6 +18,8 @@ class AdminBot(discord.Bot):
         super().__init__(debug_guilds=[conf.guild], intents=intents, *args, **options)
         self.cfg = conf
         self._setup_logging()
+        self.sqlite_engine = SqliteEngine(os.path.join(os.path.dirname(__file__), "..", "data.db"))
+        self.sqlite_engine.exec_file(os.path.join(os.path.dirname(__file__), "..", "db.sql"))
 
         self.load_extension("codeexp_admin.group_management")
 
