@@ -7,7 +7,7 @@ import logging
 
 from codeexp_admin.sqlite_engine import SqliteEngine
 
-Config = namedtuple("Config", ["token", "guild"])
+Config = namedtuple("Config", ["token", "guild", "mentor_role"])
 
 
 class AdminBot(discord.Bot):
@@ -23,6 +23,7 @@ class AdminBot(discord.Bot):
 
         self.load_extension("codeexp_admin.group_management")
         self.load_extension("codeexp_admin.user_autoassignment")
+        self.load_extension("codeexp_admin.events")
 
     def _setup_logging(self):
         logging.basicConfig()
@@ -37,3 +38,4 @@ class AdminBot(discord.Bot):
         self.log(f"Logged in as {self.user}")
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
                                                              name="for infractions"))
+

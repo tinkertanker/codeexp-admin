@@ -6,4 +6,11 @@ CREATE TABLE IF NOT EXISTS channel_store (
     category_id INTEGER NOT NULL,
     channel_number INTEGER NOT NULL,
     linked_role_id INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS members (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    discord_id INTEGER NOT NULL,
+    captcha TEXT NOT NULL,
+    captcha_passed INTEGER NOT NULL,
 )

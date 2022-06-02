@@ -16,7 +16,12 @@ def main():
         logger.error("GUILD_ID environment variable not set")
         return
 
-    conf = Config(token=os.getenv("DISCORD_TOKEN"), guild=int(os.getenv("GUILD_ID")))
+    if not os.getenv("MENTOR_ROLE_ID"):
+        logger.error("MENTOR_ROLE_ID environment variable not set")
+        return
+
+    conf = Config(token=os.getenv("DISCORD_TOKEN"), guild=int(os.getenv("GUILD_ID")),
+                  mentor_role=int(os.getenv("MENTOR_ROLE_ID")))
 
     bot = AdminBot(conf)
     bot.run(conf.token)
