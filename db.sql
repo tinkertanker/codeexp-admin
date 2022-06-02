@@ -12,5 +12,5 @@ CREATE TABLE IF NOT EXISTS members (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     discord_id INTEGER NOT NULL,
     captcha TEXT NOT NULL,
-    captcha_passed INTEGER NOT NULL,
+    captcha_passed INTEGER NOT NULL
 )
