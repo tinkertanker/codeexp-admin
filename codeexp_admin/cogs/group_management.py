@@ -11,6 +11,26 @@ class GroupManagement(commands.Cog):
     def __init__(self, bot: AdminBot):
         self.bot = bot
 
+    @commands.slash_command(name="delete_discord_category",
+                            description="Deletes all groups in some DISCORD category")
+    @commands.has_permissions(manage_channels=True)
+    async def delete_all_groups_in_category(self, ctx: discord.ApplicationContext,
+                                            category: discord.Option(discord.SlashCommandOptionType.string,
+                                                                     description="The category name")):
+        cat = [x for x in filter(lambda ch: isinstance(ch, discord.CategoryChannel), ctx.guild.channels)]
+        wanted_cat = [x for x in cat if x.name.lower() == category.lower()]
+        if not wanted_cat or len(list(wanted_cat)) < 1:
+            await ctx.respond("No category found", ephemeral=True)
+            return
+        wanted_cat = list(wanted_cat)[0]
+        channels = wanted_cat.channels
+        msg = await ctx.respond("Working now...", ephemeral=True)
+        with ctx.typing():
+            for channel in channels:
+                await channel.delete()
+                await msg.edit_original_message(content=f"Deleted {channel.name}")
+        await msg.edit_original_message(content="Done")
+
     @commands.slash_command(name="delete_all", description="Deletes all managed channels in a category")
     @commands.has_permissions(manage_channels=True)
     async def delete_all(self, ctx: discord.ApplicationContext,
