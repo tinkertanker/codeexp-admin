@@ -21,9 +21,9 @@ class AdminBot(discord.Bot):
         self.sqlite_engine = SqliteEngine(os.path.join(os.path.dirname(__file__), "..", "data.db"))
         self.sqlite_engine.exec_file(os.path.join(os.path.dirname(__file__), "..", "db.sql"))
 
-        self.load_extension("codeexp_admin.group_management")
-        self.load_extension("codeexp_admin.user_autoassignment")
-        self.load_extension("codeexp_admin.events")
+        self.load_extension("codeexp_admin.cogs.group_management")
+        self.load_extension("codeexp_admin.cogs.user_autoassignment")
+        self.load_extension("codeexp_admin.cogs.events")
 
     def _setup_logging(self):
         logging.basicConfig()
