@@ -40,7 +40,7 @@ class GroupManagement(commands.Cog):
         if isinstance(error, commands.MissingPermissions):
             await ctx.respond(str(error), ephemeral=True)
             return
-        await ctx.respond("An error occurred, please contact developer", ephemeral=True)
+        await ctx.respond("An error occurred, please contact the developer", ephemeral=True)
 
 
 def setup(bot: AdminBot):

@@ -5,9 +5,11 @@ from collections import namedtuple
 import discord
 import logging
 
+import sentry_sdk
+
 from codeexp_admin.sqlite_engine import SqliteEngine
 
-Config = namedtuple("Config", ["token", "guild", "mentor_role"])
+Config = namedtuple("Config", ["token", "guild", "mentor_role", "sentry_dsn"])
 
 
 class AdminBot(discord.Bot):
@@ -18,6 +20,7 @@ class AdminBot(discord.Bot):
         super().__init__(debug_guilds=[conf.guild], intents=intents, *args, **options)
         self.cfg = conf
         self._setup_logging()
+        self._setup_sentry()
         self.sqlite_engine = SqliteEngine(os.path.join(os.path.dirname(__file__), "..", "data.db"))
         self.sqlite_engine.exec_file(os.path.join(os.path.dirname(__file__), "..", "db.sql"))
 
@@ -31,6 +34,10 @@ class AdminBot(discord.Bot):
         logger.setLevel(logging.INFO)
         self.logger = logger
 
+    def _setup_sentry(self):
+        if self.cfg.sentry_dsn:
+            sentry_sdk.init(self.cfg.sentry_dsn, traces_sample_rate=0.5)
+
     def log(self, msg):
         self.logger.info(msg)
 
@@ -38,4 +45,3 @@ class AdminBot(discord.Bot):
         self.log(f"Logged in as {self.user}")
         await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
                                                              name="for infractions"))
-
