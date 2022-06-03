@@ -16,7 +16,7 @@ class EventHandlers(commands.Cog):
         if message.author.bot:
             return
         if not message.guild:
-            await message.channel.send("I don't respond to DMs. Please use the bot in a server.")
+            return
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
@@ -24,7 +24,7 @@ class EventHandlers(commands.Cog):
             return
         dm = await member.create_dm()
         if member.name.lower().startswith("dsta mentor"):
-            await member.add_roles(self.bot.debug_guilds[0].get_role(self.bot.cfg.mentor_role))
+            await member.add_roles(member.guild.get_role(self.bot.cfg.mentor_role))
             await dm.send(f"Welcome, {member.mention}! You have been assigned to the mentor role.")
 
 
