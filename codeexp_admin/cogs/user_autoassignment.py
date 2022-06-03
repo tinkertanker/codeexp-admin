@@ -20,6 +20,11 @@ class UserAutoAssignment(commands.Cog):
         if group_num < 1:
             await ctx.respond("Does not make sense", ephemeral=True)
             return
+        usr: discord.Member = ctx.author
+        user_has_managed_role = [role.name for role in usr.roles if role.name.lower().startswith("tkam")]
+        if len(user_has_managed_role) > 0:
+            await ctx.respond(f"You are already in a group: {user_has_managed_role[0]}", ephemeral=True)
+            return
         role_id = self.bot.sqlite_engine.cursor.execute("""
                 SELECT linked_role_id FROM channel_store WHERE category_id = ? AND channel_number = ?""",
                                                         (category, group_num)).fetchone()
@@ -31,7 +36,6 @@ class UserAutoAssignment(commands.Cog):
         if the_role is None:
             await ctx.respond("Cache error, please contact the developers", ephemeral=True)
             return
-        usr: discord.Member = ctx.author
         await ctx.respond(f"Joining {str(usr)} {the_role.name}", ephemeral=True)
         await usr.add_roles(the_role, reason=f"codeexp_admin: User {ctx.author} added as group member")
 
