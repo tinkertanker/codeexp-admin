@@ -87,7 +87,14 @@ class EventHandlers(commands.Cog):
         dm = await member.create_dm()
         captcha_text = create_captcha(self.bot.sqlite_engine, member.id)
         await dm.send(f"Welcome to the CODE_EXP 2022 server\n"
-                      f"Please react with a :white_check_mark: in the #rules channel to see the other channels.")
+                      f"1. To get started, please react with a :white_check_mark: in the #rules channel "
+                      f"to see the other channels."
+                      f"2. Head to #botspam and type in `/usermod [category: YourCategory] "
+                      f"[group_num: YourGroupNumber]`. "
+                      f"Refer to the invite email for `YourCategory` and `YourGroupNumber`."
+                      f"3. Make sure you see the channels called `#cat-X-grp-Y-txt` and `cat-X-grp-Y-vc`. "
+                      f"These are your text and voice channels, private to you, your team, and your mentors. "
+                      f"4. If you have any questions or issues, please ask in #discord-help.")
         # await dm.send(f"Please reply to me with the following : `!captcha {captcha_text}`")
         # if member.name.lower().startswith("dsta mentor"):
         #     await member.add_roles(member.guild.get_role(self.bot.cfg.mentor_role))
