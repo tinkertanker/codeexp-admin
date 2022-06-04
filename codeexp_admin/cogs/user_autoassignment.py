@@ -21,7 +21,7 @@ class UserAutoAssignment(commands.Cog):
             await ctx.respond("Does not make sense", ephemeral=True)
             return
         usr: discord.Member = ctx.author
-        user_has_managed_role = [role.name for role in usr.roles if role.name.lower().startswith("tkam")]
+        user_has_managed_role = [role.name for role in usr.roles if role.name.lower().startswith("cat")]
         if len(user_has_managed_role) > 0:
             await ctx.respond(f"You are already in a group: {user_has_managed_role[0]}", ephemeral=True)
             return
