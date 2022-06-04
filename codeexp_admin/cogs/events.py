@@ -57,27 +57,28 @@ class EventHandlers(commands.Cog):
         if message.author.bot:
             return
         if not message.guild:
-            if message.content.startswith("!captcha"):
-                args = message.content.split(" ")
-                if len(args) != 2:
-                    await message.channel.send("Usage: !captcha [captcha]")
-                    return
-                captcha_text = args[1]
-                our_server = self.bot.get_guild(self.bot.cfg.guild)
-                user_in_our_server = our_server.get_member(message.author.id)
-                if user_in_our_server:
-                    msg = await message.channel.send("Verifying captcha...")
-                    cap_verified = verify_captcha(self.bot.sqlite_engine, user_in_our_server.id, captcha_text)
-                    if cap_verified:
-                        await msg.edit(content="Captcha verified! You are now approved to join the server")
-                        await user_in_our_server.add_roles(our_server.
-                                                           get_role(self.bot.cfg.mentor_role))
-                        return
-                    await msg.edit(content="Could not verify your captcha. Either your captcha is incorrect, "
-                                           "or you are already verified. If you believe this is an error, "
-                                           "please contact us")
-                    return
-                await message.channel.send("You are not in our server. Please join the server and try again.")
+            return
+            # if message.content.startswith("!captcha"):
+            #     args = message.content.split(" ")
+            #     if len(args) != 2:
+            #         await message.channel.send("Usage: !captcha [captcha]")
+            #         return
+            #     captcha_text = args[1]
+            #     our_server = self.bot.get_guild(self.bot.cfg.guild)
+            #     user_in_our_server = our_server.get_member(message.author.id)
+            #     if user_in_our_server:
+            #         msg = await message.channel.send("Verifying captcha...")
+            #         cap_verified = verify_captcha(self.bot.sqlite_engine, user_in_our_server.id, captcha_text)
+            #         if cap_verified:
+            #             await msg.edit(content="Captcha verified! You are now approved to join the server")
+            #             await user_in_our_server.add_roles(our_server.
+            #                                                get_role(self.bot.cfg.mentor_role))
+            #             return
+            #         await msg.edit(content="Could not verify your captcha. Either your captcha is incorrect, "
+            #                                "or you are already verified. If you believe this is an error, "
+            #                                "please contact us")
+            #         return
+            #     await message.channel.send("You are not in our server. Please join the server and try again.")
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
@@ -85,7 +86,9 @@ class EventHandlers(commands.Cog):
             return
         dm = await member.create_dm()
         captcha_text = create_captcha(self.bot.sqlite_engine, member.id)
-        await dm.send(f"Please reply to me with the following : `!captcha {captcha_text}`")
+        await dm.send(f"Welcome to the server! Please visit any channel and "
+                      f"use /usermod [category] [group number] to join your group!")
+        # await dm.send(f"Please reply to me with the following : `!captcha {captcha_text}`")
         # if member.name.lower().startswith("dsta mentor"):
         #     await member.add_roles(member.guild.get_role(self.bot.cfg.mentor_role))
         #     await dm.send(f"Welcome, {member.mention}! You have been assigned to the mentor role.")
