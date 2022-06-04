@@ -7,7 +7,7 @@ import discord
 
 from codeexp_admin import SqliteEngine
 
-prefix = "tkam"
+prefix = "cat"
 
 
 def get_last_grp_num(engine: SqliteEngine, category: int) -> int:
@@ -54,11 +54,11 @@ async def create_managed_channels(guild: discord.Guild, category: int, num_chann
     last_group_num = get_last_grp_num(engine, category)
     for i in range(num_channels):
         if update_message:
-            await update_message.edit_original_message(content=f"Creating {last_group_num + i + 1}")
-        role = await guild.create_role(name=f"{prefix}-{category}-{last_group_num + i + 1}")
-        for gtype in ["txtgrp", "vcgrp"]:
-            group_name = f"{prefix}-{category}-{gtype}-{last_group_num + i + 1}"
-            if gtype == "txtgrp":
+            await update_message.edit_original_message(content=f"Creating group #{last_group_num + i + 1}")
+        role = await guild.create_role(name=f"{prefix}-{category}-grp-{last_group_num + i + 1}")
+        for gtype in ["txt", "vc"]:
+            group_name = f"{prefix}-{category}-grp-{last_group_num + i + 1}-{gtype}"
+            if gtype == "txt":
                 chan = await guild.create_text_channel(group_name)
                 engine.cursor.execute("""
                 INSERT INTO channel_store (discord_channel_id, discord_channel_name, channel_type, category_id,
@@ -67,7 +67,7 @@ async def create_managed_channels(guild: discord.Guild, category: int, num_chann
                 engine.connection.commit()
                 await chan.set_permissions(role, view_channel=True, reason="Created by codeexp_admin")
 
-            elif gtype == "vcgrp":
+            elif gtype == "vc":
                 chan = await guild.create_voice_channel(group_name)
                 engine.cursor.execute("""
                                 INSERT INTO channel_store (discord_channel_id, discord_channel_name, channel_type, category_id,
