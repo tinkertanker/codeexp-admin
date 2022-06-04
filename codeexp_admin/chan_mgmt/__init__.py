@@ -11,10 +11,10 @@ prefix = "tkam"
 
 
 def get_last_grp_num(engine: SqliteEngine, category: int) -> int:
-    engine.cursor.execute("""
+    cur = engine.cursor.execute("""
     SELECT channel_number FROM channel_store WHERE category_id = ? ORDER BY channel_number DESC LIMIT 1
-    """, [category])
-    result = engine.cursor.fetchone()
+    """, (category,))
+    result = cur.fetchone()
     if result is None:
         return 0
     else:
@@ -40,6 +40,11 @@ def get_managed_roles(guild: discord.Guild, category: int) -> Optional[list[disc
         )
     )
     return managed_roles if len(managed_roles) > 0 else None
+
+
+async def create_managed_channel(guild: discord.Guild, category: int, channel_number: int, *, engine: SqliteEngine,
+                                 update_message: Optional[discord.Interaction]):
+    pass
 
 
 async def create_managed_channels(guild: discord.Guild, category: int, num_channels: int = 1,
