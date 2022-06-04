@@ -9,7 +9,7 @@ import sentry_sdk
 
 from codeexp_admin.sqlite_engine import SqliteEngine
 
-Config = namedtuple("Config", ["token", "guild", "mentor_role", "sentry_dsn"])
+Config = namedtuple("Config", ["token", "guild", "mentor_role", "sentry_dsn", "member_role"])
 
 
 class AdminBot(discord.Bot):
