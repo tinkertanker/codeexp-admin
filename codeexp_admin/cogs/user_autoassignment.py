@@ -1,3 +1,4 @@
+from typing import Optional
 # noinspection PyPackageRequirements
 import discord
 # noinspection PyPackageRequirements
@@ -5,14 +6,52 @@ from discord.ext import commands
 # noinspection PyPackageRequirements
 from discord.ext import bridge
 
-from codeexp_admin import AdminBot
+from codeexp_admin import AdminBot, SqliteEngine
+
+
+def check_usr_has_managed_role(user: discord.Member, role_prefix: str = "cat") -> Optional[str]:
+    user_has_managed_role = [role.name for role in user.roles if role.name.lower().startswith(role_prefix)]
+    return user_has_managed_role[0] if len(user_has_managed_role) > 0 else None
+
+
+async def set_group(user: discord.Member, category: str, group: int, *,
+                    engine: SqliteEngine,
+                    update_message: Optional[discord.Interaction] = None) -> bool:
+    has_managed = check_usr_has_managed_role(user)
+    # note: this force cast can lead to crashes
+    category = int(category)
+    if has_managed:
+        if update_message:
+            await update_message.edit_original_message(content=f"You have a group! `{has_managed}`")
+        return False
+    role_id = engine.cursor.execute("""
+                    SELECT linked_role_id FROM channel_store WHERE category_id = ? AND channel_number = ?""",
+                                    (category, group)).fetchone()
+    if role_id is None:
+        if update_message:
+            await update_message.edit_original_message(content=f"This role does not exist")
+        return False
+    the_role = user.guild.get_role(role_id[0])
+    if the_role is None:
+        if update_message:
+            await update_message.edit_original_message(content="Cache error. Please contact the developers")
+        return False
+
+    if update_message:
+        await update_message.edit_original_message(content=f"You are now joining {the_role.name}")
+    await user.add_roles(the_role, reason=f"codeexp_admin: User {user} joined cat {category} grp {group}")
+    return True
 
 
 class UserAutoAssignment(commands.Cog):
     def __init__(self, bot: AdminBot):
         self.bot = bot
 
-    @bridge.bridge_command(name="usermod", description="Joins a group")
+    @commands.command(name="usermod")
+    async def normie_join_group(self, ctx: discord.ApplicationContext, category: int, group_num: int):
+        await self.join_group(ctx, category, group_num)
+
+    @commands.slash_command(name="usermod", description="Joins a group")
     async def join_group(self, ctx: discord.ApplicationContext,
                          category: discord.Option(choices=['0', '1'],  # future: don't hardcode
                                                   description="The category"),
