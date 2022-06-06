@@ -2,6 +2,7 @@
 import discord
 # noinspection PyPackageRequirements
 from discord.ext import commands
+# noinspection PyPackageRequirements
 from discord.ext import bridge
 
 from codeexp_admin import AdminBot
