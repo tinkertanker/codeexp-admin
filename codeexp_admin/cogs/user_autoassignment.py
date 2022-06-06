@@ -80,23 +80,6 @@ class UserAutoAssignment(commands.Cog):
         update_message = await ctx.respond("Now processing", ephemeral=True)
         await set_group(usr, category, group_num, engine=self.bot.sqlite_engine,
                         update_message=update_message)
-        # user_has_managed_role = [role.name for role in usr.roles if role.name.lower().startswith("cat")]
-        # if len(user_has_managed_role) > 0:
-        #     await ctx.respond(f"You are already in a group: {user_has_managed_role[0]}", ephemeral=True)
-        #     return
-        # role_id = self.bot.sqlite_engine.cursor.execute("""
-        #         SELECT linked_role_id FROM channel_store WHERE category_id = ? AND channel_number = ?""",
-        #                                                 (category, group_num)).fetchone()
-        # if role_id is None:
-        #     await ctx.respond("The role does not exist", ephemeral=True)
-        #     return
-        # role_id = role_id[0]
-        # the_role = ctx.guild.get_role(role_id)
-        # if the_role is None:
-        #     await ctx.respond("Cache error, please contact the developers", ephemeral=True)
-        #     return
-        # await ctx.respond(f"Joining {str(usr)} {the_role.name}", ephemeral=True)
-        # await usr.add_roles(the_role, reason=f"codeexp_admin: User {ctx.author} added as group member")
 
     @commands.slash_command(name="mentor", description="Assigns a user to be a mentor")
     @commands.has_permissions(manage_channels=True)
