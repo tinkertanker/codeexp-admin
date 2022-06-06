@@ -58,6 +58,20 @@ class EventHandlers(commands.Cog):
             return
         if not message.guild:
             return
+
+        if message.content.startswith("/usermod"):
+            args = message.content.split(" ")
+            if len(args) < 3:
+                await message.channel.send("Usage: /usermod <cat> <grp>")
+                return
+
+            if not args[1].isdigit():
+                await message.channel.send("Please do not include strings. Your cat and grp ids are numeric!")
+                return
+            await message.channel.send(f"{message.author.mention}, you need to be patient and wait for "
+                                       f"the autocomplete to pop up before using this command.")
+            return
+
             # if message.content.startswith("!captcha"):
             #     args = message.content.split(" ")
             #     if len(args) != 2:
