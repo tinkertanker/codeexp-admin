@@ -10,12 +10,34 @@ from codeexp_admin import AdminBot, SqliteEngine
 
 
 def check_usr_has_managed_role(user: discord.Member, role_prefix: str = "cat") -> Optional[str]:
+    """
+    This function checks if a user has a role managed by the bot.
+    Used to prevent people from joining more than 1 group.
+
+    Args:
+        user: The discord.Member instance of the user
+        role_prefix: The role prefix of the user
+
+    Returns:
+        The role name if the user has a role managed by the bot, None otherwise
+    """
     user_has_managed_role = [role.name for role in user.roles if role.name.lower().startswith(role_prefix)]
     return user_has_managed_role[0] if len(user_has_managed_role) > 0 else None
 
 
 async def edit_msg(msg: Union[discord.Interaction, discord.Message],
                    new_content: str) -> Union[discord.Message, discord.InteractionMessage]:
+    """
+    A flexible edit message function that allows you to edit both Interactions and regular Messages.
+    Note that the edit is immediately processed, and you are simply seeing the result of the edit.
+
+    Args:
+        msg: The message
+        new_content: The new content to place in the message.
+
+    Returns:
+        The edited message.
+    """
     if isinstance(msg, discord.Interaction):
         return await msg.edit_original_message(content=new_content)
     return await msg.edit(content=new_content)
@@ -24,8 +46,22 @@ async def edit_msg(msg: Union[discord.Interaction, discord.Message],
 async def set_group(user: discord.Member, category: Union[str, int], group: int, *,
                     engine: SqliteEngine,
                     update_message: Optional[Union[discord.Interaction, discord.Message]] = None) -> bool:
+    """
+    Modifies the group of a user
+
+    Args:
+        user: The discord.Member to modify
+        category: The category they would like to join
+        group: The group they would like to join
+        engine: The SqliteEngine. Pass in the one that is currently in use.
+        update_message: Optionally, the message to edit to show the user that processing is taking place.
+        Also where errors are sent
+
+    Returns:
+        True or False depending on whether the operation was able to complete
+    """
     has_managed = check_usr_has_managed_role(user)
-    # note: this force cast can lead to crashes
+    # note: this force cast MIGHT lead to crashes. use sentry to monitor this.
     category = int(category)
     if has_managed:
         if update_message:
@@ -56,6 +92,18 @@ class UserAutoAssignment(commands.Cog):
 
     @commands.command(name="usermod")
     async def normie_join_group(self, ctx: discord.ApplicationContext, category: int, group_num: int):
+        """
+        This command is used to join a group for a user.
+
+        Args:
+            ctx: The discord.ApplicationContext instance
+            category: The category to join
+            group_num: The group to join
+
+        Returns:
+            None
+
+        """
         update_message = await ctx.send("Now processing your join request...")
         if category not in [0, 1]:
             await edit_msg(update_message, "Invalid category. Please choose: [0, 1]")
