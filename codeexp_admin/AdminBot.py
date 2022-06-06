@@ -19,6 +19,10 @@ class AdminBot(bridge.Bot):
         intents = discord.Intents.default()
         # noinspection PyDunderSlots, PyUnresolvedReferences
         intents.members = True
+        # noinspection PyDunderSlots, PyUnresolvedReferences
+        intents.messages = True
+        # noinspection PyDunderSlots, PyUnresolvedReferences
+        intents.message_content = True
         super().__init__(
             command_prefix="$",
             debug_guilds=[conf.guild],
