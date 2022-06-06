@@ -5,6 +5,8 @@ from collections import namedtuple
 import discord
 import logging
 
+from discord.ext import bridge
+
 import sentry_sdk
 
 from codeexp_admin.sqlite_engine import SqliteEngine
@@ -12,12 +14,12 @@ from codeexp_admin.sqlite_engine import SqliteEngine
 Config = namedtuple("Config", ["token", "guild", "mentor_role", "sentry_dsn", "member_role"])
 
 
-class AdminBot(discord.Bot):
+class AdminBot(bridge.Bot):
     def __init__(self, conf: Config, *args, **options):
         intents = discord.Intents.default()
         # noinspection PyDunderSlots, PyUnresolvedReferences
         intents.members = True
-        super().__init__(debug_guilds=[conf.guild], intents=intents, *args, **options)
+        super().__init__(debug_guilds=[conf.guild], intents=intents, command_prefix="!", *args, **options)
         self.cfg = conf
         self._setup_logging()
         self._setup_sentry()

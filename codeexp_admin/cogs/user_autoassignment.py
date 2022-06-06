@@ -2,6 +2,7 @@
 import discord
 # noinspection PyPackageRequirements
 from discord.ext import commands
+from discord.ext import bridge
 
 from codeexp_admin import AdminBot
 
@@ -10,7 +11,7 @@ class UserAutoAssignment(commands.Cog):
     def __init__(self, bot: AdminBot):
         self.bot = bot
 
-    @commands.slash_command(name="usermod", description="Joins a group")
+    @bridge.bridge_command(name="usermod", description="Joins a group")
     async def join_group(self, ctx: discord.ApplicationContext,
                          category: discord.Option(choices=['0', '1'],  # future: don't hardcode
                                                   description="The category"),
