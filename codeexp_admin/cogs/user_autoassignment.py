@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 # noinspection PyPackageRequirements
 import discord
 # noinspection PyPackageRequirements
@@ -14,31 +14,38 @@ def check_usr_has_managed_role(user: discord.Member, role_prefix: str = "cat") -
     return user_has_managed_role[0] if len(user_has_managed_role) > 0 else None
 
 
-async def set_group(user: discord.Member, category: str, group: int, *,
+async def edit_msg(msg: Union[discord.Interaction, discord.Message],
+                   new_content: str) -> Union[discord.Message, discord.InteractionMessage]:
+    if isinstance(msg, discord.Interaction):
+        return await msg.edit_original_message(content=new_content)
+    return await msg.edit(content=new_content)
+
+
+async def set_group(user: discord.Member, category: Union[str, int], group: int, *,
                     engine: SqliteEngine,
-                    update_message: Optional[discord.Interaction] = None) -> bool:
+                    update_message: Optional[Union[discord.Interaction, discord.Message]] = None) -> bool:
     has_managed = check_usr_has_managed_role(user)
     # note: this force cast can lead to crashes
     category = int(category)
     if has_managed:
         if update_message:
-            await update_message.edit_original_message(content=f"You have a group! `{has_managed}`")
+            await edit_msg(update_message, f"You have a group! `{has_managed}`")
         return False
     role_id = engine.cursor.execute("""
                     SELECT linked_role_id FROM channel_store WHERE category_id = ? AND channel_number = ?""",
                                     (category, group)).fetchone()
     if role_id is None:
         if update_message:
-            await update_message.edit_original_message(content=f"This role does not exist")
+            await edit_msg(update_message, "This role does not exist")
         return False
     the_role = user.guild.get_role(role_id[0])
     if the_role is None:
         if update_message:
-            await update_message.edit_original_message(content="Cache error. Please contact the developers")
+            await edit_msg(update_message, "Cache error. Please contact the developers")
         return False
 
     if update_message:
-        await update_message.edit_original_message(content=f"You are now joining {the_role.name}")
+        await edit_msg(update_message, f"You are now joining {the_role.name}")
     await user.add_roles(the_role, reason=f"codeexp_admin: User {user} joined cat {category} grp {group}")
     return True
 
@@ -49,7 +56,15 @@ class UserAutoAssignment(commands.Cog):
 
     @commands.command(name="usermod")
     async def normie_join_group(self, ctx: discord.ApplicationContext, category: int, group_num: int):
-        await self.join_group(ctx, category, group_num)
+        update_message = await ctx.send("Now processing your join request...")
+        if category not in [0, 1]:
+            await edit_msg(update_message, "Invalid category. Please choose: [0, 1]")
+            return
+        if group_num < 1:
+            await edit_msg(update_message, "Invalid group. Please choose a number greater than 0")
+            return
+        await set_group(ctx.author, category, group_num,
+                        engine=self.bot.sqlite_engine, update_message=update_message)
 
     @commands.slash_command(name="usermod", description="Joins a group")
     async def join_group(self, ctx: discord.ApplicationContext,
