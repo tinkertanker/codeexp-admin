@@ -59,6 +59,7 @@ async def set_group(
     category: Union[str, int],
     group: int,
     *,
+    bot: AdminBot,
     engine: SqliteEngine,
     update_message: Optional[Union[discord.Interaction, discord.Message]] = None,
 ) -> bool:
@@ -71,8 +72,9 @@ async def set_group(
         group: The group they would like to join
         engine: The SqliteEngine. Pass in the one that is currently in use.
         update_message: Optionally, the message to edit to show the user
-        that processing is taking place.
-        Also where errors are sent
+                        that processing is taking place.
+                        Also where errors are sent
+        bot: The AdminBot instance
 
     Returns:
         True or False depending on whether the operation was able to complete
@@ -81,13 +83,15 @@ async def set_group(
     # note: this force cast MIGHT lead to crashes. use sentry to monitor this.
     category = int(category)
     if has_managed:
-        if update_message:
-            await edit_msg(update_message, f"You have a group! `{has_managed}`")
+        mentor_role = user.guild.get_role(bot.cfg.mentor_role)
+        if mentor_role.id not in [role.id for role in user.roles]:
+            # user cannot join multiple groups if they are not a mentor
+            if update_message:
+                await edit_msg(update_message, f"You have a group! `{has_managed}`")
         return False
     role_id = engine.cursor.execute(
-        """
-                    SELECT linked_role_id FROM channel_store WHERE category_id = ? 
-                    AND channel_number = ?""",
+        """SELECT linked_role_id FROM channel_store WHERE 
+        category_id = ? AND channel_number = ?""",
         (category, group),
     ).fetchone()
     if role_id is None:
