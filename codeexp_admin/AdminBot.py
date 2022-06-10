@@ -11,7 +11,9 @@ import sentry_sdk
 
 from codeexp_admin.sqlite_engine import SqliteEngine
 
-Config = namedtuple("Config", ["token", "guild", "mentor_role", "sentry_dsn", "member_role"])
+Config = namedtuple(
+    "Config", ["token", "guild", "mentor_role", "sentry_dsn", "member_role"]
+)
 
 
 class AdminBot(bridge.Bot):
@@ -27,13 +29,18 @@ class AdminBot(bridge.Bot):
             command_prefix="$",
             debug_guilds=[conf.guild],
             intents=intents,
-            *args, **options
+            *args,
+            **options,
         )
         self.cfg = conf
         self._setup_logging()
         self._setup_sentry()
-        self.sqlite_engine = SqliteEngine(os.path.join(os.path.dirname(__file__), "..", "data.db"))
-        self.sqlite_engine.exec_file(os.path.join(os.path.dirname(__file__), "..", "db.sql"))
+        self.sqlite_engine = SqliteEngine(
+            os.path.join(os.path.dirname(__file__), "..", "data.db")
+        )
+        self.sqlite_engine.exec_file(
+            os.path.join(os.path.dirname(__file__), "..", "db.sql")
+        )
 
         self.load_extension("codeexp_admin.cogs.group_management")
         self.load_extension("codeexp_admin.cogs.user_autoassignment")
@@ -41,7 +48,7 @@ class AdminBot(bridge.Bot):
 
     def _setup_logging(self):
         logging.basicConfig()
-        logger = logging.getLogger('adminbot')
+        logger = logging.getLogger("adminbot")
         logger.setLevel(logging.INFO)
         self.logger = logger
 
@@ -54,5 +61,8 @@ class AdminBot(bridge.Bot):
 
     async def on_ready(self):
         self.log(f"Logged in as {self.user}")
-        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-                                                             name="for infractions"))
+        await self.change_presence(
+            activity=discord.Activity(
+                type=discord.ActivityType.watching, name="for infractions"
+            )
+        )

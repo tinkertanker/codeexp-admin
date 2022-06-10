@@ -25,13 +25,17 @@ def main():
         return
 
     if not os.getenv("SENTRY_DSN"):
-        logger.warning("Not running with sentry. You won't have easy access to error reports. Continuing anyway...")
+        logger.warning(
+            "Not running with sentry. You won't have easy access to error reports. Continuing anyway..."
+        )
 
-    conf = Config(token=os.getenv("DISCORD_TOKEN"),
-                  guild=int(os.getenv("GUILD_ID")),
-                  mentor_role=int(os.getenv("MENTOR_ROLE_ID")),
-                  sentry_dsn=os.getenv("SENTRY_DSN"),
-                  member_role=int(os.getenv("MEMBER_ROLE_ID")))
+    conf = Config(
+        token=os.getenv("DISCORD_TOKEN"),
+        guild=int(os.getenv("GUILD_ID")),
+        mentor_role=int(os.getenv("MENTOR_ROLE_ID")),
+        sentry_dsn=os.getenv("SENTRY_DSN"),
+        member_role=int(os.getenv("MEMBER_ROLE_ID")),
+    )
 
     bot = AdminBot(conf)
     bot.run(conf.token)
