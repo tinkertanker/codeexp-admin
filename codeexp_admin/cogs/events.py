@@ -1,5 +1,6 @@
 # noinspection PyPackageRequirements
 import discord
+
 # noinspection PyPackageRequirements
 from discord.ext import commands
 
@@ -15,10 +16,14 @@ def create_captcha(engine: SqliteEngine, discord_id: int) -> str:
     :param discord_id: The Discord ID of the user
     :return: The captcha
     """
-    captcha_str = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
-    engine.cursor.execute("""
+    captcha_str = "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(6)
+    )
+    engine.cursor.execute(
+        """
     INSERT INTO members (discord_id, captcha, captcha_passed) VALUES (?, ?, 0)""",
-                          (discord_id, captcha_str))
+        (discord_id, captcha_str),
+    )
     return captcha_str
 
 
@@ -35,20 +40,25 @@ def verify_captcha(engine: SqliteEngine, discord_id: int, captcha_text: str) -> 
         True if the captcha is correct, False otherwise
 
     """
-    engine.cursor.execute("""
-    SELECT captcha FROM members WHERE discord_id = ?""", (discord_id,))
+    engine.cursor.execute(
+        """
+    SELECT captcha FROM members WHERE discord_id = ?""",
+        (discord_id,),
+    )
     captcha_str = engine.cursor.fetchone()
     if captcha_str is None:
         return False
     if captcha_str[0] == captcha_text:
-        engine.cursor.execute("""
-        UPDATE members SET captcha_passed = 1 WHERE discord_id = ?""", (discord_id,))
+        engine.cursor.execute(
+            """
+        UPDATE members SET captcha_passed = 1 WHERE discord_id = ?""",
+            (discord_id,),
+        )
         return True
     return False
 
 
 class EventHandlers(commands.Cog):
-
     def __init__(self, bot: AdminBot):
         self.bot = bot
 
@@ -66,10 +76,14 @@ class EventHandlers(commands.Cog):
                 return
 
             if not args[1].isdigit():
-                await message.channel.send("Please do not include strings. Your cat and grp ids are numeric!")
+                await message.channel.send(
+                    "Please do not include strings. Your cat and grp ids are numeric!"
+                )
                 return
-            await message.channel.send(f"{message.author.mention}, you need to be patient and wait for "
-                                       f"the autocomplete to pop up before using this command.")
+            await message.channel.send(
+                f"{message.author.mention}, you need to be patient and wait for "
+                f"the autocomplete to pop up before using this command."
+            )
             return
 
             # if message.content.startswith("!captcha"):

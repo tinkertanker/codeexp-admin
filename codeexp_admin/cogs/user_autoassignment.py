@@ -1,15 +1,21 @@
 from typing import Optional, Union
+
 # noinspection PyPackageRequirements
 import discord
+
 # noinspection PyPackageRequirements
 from discord.ext import commands
+
 # noinspection PyPackageRequirements
 from discord.ext import bridge
+from discord import SlashCommandOptionType as ScOt
 
 from codeexp_admin import AdminBot, SqliteEngine
 
 
-def check_usr_has_managed_role(user: discord.Member, role_prefix: str = "cat") -> Optional[str]:
+def check_usr_has_managed_role(
+    user: discord.Member, role_prefix: str = "cat"
+) -> Optional[str]:
     """
     This function checks if a user has a role managed by the bot.
     Used to prevent people from joining more than 1 group.
@@ -21,15 +27,20 @@ def check_usr_has_managed_role(user: discord.Member, role_prefix: str = "cat") -
     Returns:
         The role name if the user has a role managed by the bot, None otherwise
     """
-    user_has_managed_role = [role.name for role in user.roles if role.name.lower().startswith(role_prefix)]
+    user_has_managed_role = [
+        role.name for role in user.roles if role.name.lower().startswith(role_prefix)
+    ]
     return user_has_managed_role[0] if len(user_has_managed_role) > 0 else None
 
 
-async def edit_msg(msg: Union[discord.Interaction, discord.Message],
-                   new_content: str) -> Union[discord.Message, discord.InteractionMessage]:
+async def edit_msg(
+    msg: Union[discord.Interaction, discord.Message], new_content: str
+) -> Union[discord.Message, discord.InteractionMessage]:
     """
-    A flexible edit message function that allows you to edit both Interactions and regular Messages.
-    Note that the edit is immediately processed, and you are simply seeing the result of the edit.
+    A flexible edit message function that allows you to edit both
+     Interactions and regular Messages.
+    Note that the edit is immediately processed,
+    and you are simply seeing the result of the edit.
 
     Args:
         msg: The message
@@ -43,9 +54,15 @@ async def edit_msg(msg: Union[discord.Interaction, discord.Message],
     return await msg.edit(content=new_content)
 
 
-async def set_group(user: discord.Member, category: Union[str, int], group: int, *,
-                    engine: SqliteEngine,
-                    update_message: Optional[Union[discord.Interaction, discord.Message]] = None) -> bool:
+async def set_group(
+    user: discord.Member,
+    category: Union[str, int],
+    group: int,
+    *,
+    bot: AdminBot,
+    engine: SqliteEngine,
+    update_message: Optional[Union[discord.Interaction, discord.Message]] = None,
+) -> bool:
     """
     Modifies the group of a user
 
@@ -54,8 +71,10 @@ async def set_group(user: discord.Member, category: Union[str, int], group: int,
         category: The category they would like to join
         group: The group they would like to join
         engine: The SqliteEngine. Pass in the one that is currently in use.
-        update_message: Optionally, the message to edit to show the user that processing is taking place.
-        Also where errors are sent
+        update_message: Optionally, the message to edit to show the user
+                        that processing is taking place.
+                        Also where errors are sent
+        bot: The AdminBot instance
 
     Returns:
         True or False depending on whether the operation was able to complete
@@ -64,12 +83,17 @@ async def set_group(user: discord.Member, category: Union[str, int], group: int,
     # note: this force cast MIGHT lead to crashes. use sentry to monitor this.
     category = int(category)
     if has_managed:
-        if update_message:
-            await edit_msg(update_message, f"You have a group! `{has_managed}`")
+        mentor_role = user.guild.get_role(bot.cfg.mentor_role)
+        if mentor_role.id not in [role.id for role in user.roles]:
+            # user cannot join multiple groups if they are not a mentor
+            if update_message:
+                await edit_msg(update_message, f"You have a group! `{has_managed}`")
         return False
-    role_id = engine.cursor.execute("""
-                    SELECT linked_role_id FROM channel_store WHERE category_id = ? AND channel_number = ?""",
-                                    (category, group)).fetchone()
+    role_id = engine.cursor.execute(
+        """SELECT linked_role_id FROM channel_store WHERE 
+        category_id = ? AND channel_number = ?""",
+        (category, group),
+    ).fetchone()
     if role_id is None:
         if update_message:
             await edit_msg(update_message, "This role does not exist")
@@ -82,7 +106,10 @@ async def set_group(user: discord.Member, category: Union[str, int], group: int,
 
     if update_message:
         await edit_msg(update_message, f"You are now joining {the_role.name}")
-    await user.add_roles(the_role, reason=f"codeexp_admin: User {user} joined cat {category} grp {group}")
+    await user.add_roles(
+        the_role,
+        reason=f"codeexp_admin: User {user} " f"joined cat {category} grp {group}",
+    )
     return True
 
 
@@ -91,7 +118,9 @@ class UserAutoAssignment(commands.Cog):
         self.bot = bot
 
     @commands.command(name="usermod")
-    async def normie_join_group(self, ctx: discord.ApplicationContext, category: int, group_num: int):
+    async def normie_join_group(
+        self, ctx: discord.ApplicationContext, category: int, group_num: int
+    ):
         """
         This command is used to join a group for a user.
 
@@ -109,60 +138,99 @@ class UserAutoAssignment(commands.Cog):
             await edit_msg(update_message, "Invalid category. Please choose: [0, 1]")
             return
         if group_num < 1:
-            await edit_msg(update_message, "Invalid group. Please choose a number greater than 0")
+            await edit_msg(
+                update_message,
+                "Invalid group. Please choose a " "number greater than 0",
+            )
             return
-        await set_group(ctx.author, category, group_num,
-                        engine=self.bot.sqlite_engine, update_message=update_message)
+        await set_group(
+            ctx.author,
+            category,
+            group_num,
+            engine=self.bot.sqlite_engine,
+            update_message=update_message,
+        )
 
     @commands.slash_command(name="usermod", description="Joins a group")
-    async def join_group(self, ctx: discord.ApplicationContext,
-                         category: discord.Option(choices=['0', '1'],  # future: don't hardcode
-                                                  description="The category"),
-                         group_num: discord.Option(discord.SlashCommandOptionType.integer,
-                                                   description="The group number")
-                         ):
+    async def join_group(
+        self,
+        ctx: discord.ApplicationContext,
+        category: discord.Option(
+            choices=["0", "1"],
+            # future: don't hardcode
+            description="The category",
+        ),
+        group_num: discord.Option(ScOt.integer, description="The group number"),
+    ):
         if group_num < 1:
             await ctx.respond("Does not make sense", ephemeral=True)
             return
         usr: discord.Member = ctx.author
         update_message = await ctx.respond("Now processing", ephemeral=True)
-        await set_group(usr, category, group_num, engine=self.bot.sqlite_engine,
-                        update_message=update_message)
+        await set_group(
+            usr,
+            category,
+            group_num,
+            engine=self.bot.sqlite_engine,
+            update_message=update_message,
+        )
 
     @commands.slash_command(name="mentor", description="Assigns a user to be a mentor")
     @commands.has_permissions(manage_channels=True)
-    async def mentor(self, ctx: discord.ApplicationContext,
-                     user: discord.Option(discord.SlashCommandOptionType.user,
-                                          description="The user to set as a mentor"),
-                     category: discord.Option(choices=['0', '1'],  # future: don't hardcode
-                                              description="The category"),
-                     group_num: discord.Option(discord.SlashCommandOptionType.integer,
-                                               description="The group number")):
+    async def mentor(
+        self,
+        ctx: discord.ApplicationContext,
+        user: discord.Option(
+            discord.SlashCommandOptionType.user,
+            description="The user to set as a mentor",
+        ),
+        category: discord.Option(
+            choices=["0", "1"],
+            # future: don't hardcode
+            description="The category",
+        ),
+        group_num: discord.Option(
+            discord.SlashCommandOptionType.integer, description="The group number"
+        ),
+    ):
         if group_num < 1:
             await ctx.respond("Does not make sense", ephemeral=True)
             return
-        role_id = self.bot.sqlite_engine.cursor.execute("""
-        SELECT linked_role_id FROM channel_store WHERE category_id = ? AND channel_number = ?""",
-                                                        (category, group_num)).fetchone()
+        role_id = self.bot.sqlite_engine.cursor.execute(
+            """
+        SELECT linked_role_id FROM channel_store WHERE category_id = ? 
+        AND channel_number = ?""",
+            (category, group_num),
+        ).fetchone()
         if role_id is None:
-            await ctx.respond("Database error, please contact developer. "
-                              "(Note: This may occur if the group does not exist. "
-                              "If it does not, please create the group)", ephemeral=True)
+            await ctx.respond(
+                "Database error, please contact developer. "
+                "(Note: This may occur if the group does not exist. "
+                "If it does not, please create the group)",
+                ephemeral=True,
+            )
             return
         role_id = role_id[0]
         the_role = ctx.guild.get_role(role_id)
         if the_role is None:
-            await ctx.respond("Role could not be fetched. "
-                              "Please check bot permissions, "
-                              "or check if the role has been deleted. "
-                              "If the group does not exist, please create it", ephemeral=True)
+            await ctx.respond(
+                "Role could not be fetched. "
+                "Please check bot permissions, "
+                "or check if the role has been deleted. "
+                "If the group does not exist, please create it",
+                ephemeral=True,
+            )
             return
         usr: discord.Member = user
         await ctx.respond(f"Adding {str(user)} to {the_role.name}", ephemeral=True)
-        await usr.add_roles(the_role, reason=f"codeexp_admin: User {ctx.author} set as mentor")
+        await usr.add_roles(
+            the_role, reason=f"codeexp_admin: User {ctx.author} " f"set as mentor"
+        )
 
     @commands.Cog.listener()
-    async def on_application_command_error(self, ctx: discord.ApplicationContext, error: Exception):
+    async def on_application_command_error(
+        self, ctx: discord.ApplicationContext, error: Exception
+    ):
         if isinstance(error, commands.MissingPermissions):
             await ctx.respond(str(error), ephemeral=True)
             return

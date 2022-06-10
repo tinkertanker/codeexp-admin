@@ -18,4 +18,3 @@ class SqliteEngine:
     def exec_file(self, file_path: str):
         with open(os.path.abspath(file_path), "r") as f:
             self.cursor.executescript(f.read())
-
