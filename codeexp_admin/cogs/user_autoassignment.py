@@ -147,6 +147,7 @@ class UserAutoAssignment(commands.Cog):
             ctx.author,
             category,
             group_num,
+            bot=self.bot,
             engine=self.bot.sqlite_engine,
             update_message=update_message,
         )
@@ -171,6 +172,7 @@ class UserAutoAssignment(commands.Cog):
             usr,
             category,
             group_num,
+            bot=self.bot,
             engine=self.bot.sqlite_engine,
             update_message=update_message,
         )
