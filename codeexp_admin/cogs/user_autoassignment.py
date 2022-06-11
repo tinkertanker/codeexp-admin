@@ -88,7 +88,7 @@ async def set_group(
             # user cannot join multiple groups if they are not a mentor
             if update_message:
                 await edit_msg(update_message, f"You have a group! `{has_managed}`")
-        return False
+            return False
     role_id = engine.cursor.execute(
         """SELECT linked_role_id FROM channel_store WHERE 
         category_id = ? AND channel_number = ?""",
