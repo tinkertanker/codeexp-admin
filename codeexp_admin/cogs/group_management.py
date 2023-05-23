@@ -47,7 +47,7 @@ class GroupManagement(commands.Cog):
     async def delete_all(
         self,
         ctx: discord.ApplicationContext,
-        category_id: discord.Option(choices=["0", "1"], description="Category ID"),
+        category_id: discord.Option(choices=["1", "2"], description="Category ID"),
     ):
         update_msg = await ctx.respond("Now working...", ephemeral=True)
         await delete_managed_channels(
@@ -66,7 +66,7 @@ class GroupManagement(commands.Cog):
         self,
         ctx: discord.ApplicationContext,
         category_id: discord.Option(
-            choices=["0", "1"],
+            choices=["1", "2"],
             # TODO: do not hardcode choices
             description="The category ID",
         ),

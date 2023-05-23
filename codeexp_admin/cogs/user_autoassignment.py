@@ -135,7 +135,7 @@ class UserAutoAssignment(commands.Cog):
         """
         update_message = await ctx.send("Now processing your join request...")
         if category not in [0, 1]:
-            await edit_msg(update_message, "Invalid category. Please choose: [0, 1]")
+            await edit_msg(update_message, "Invalid category. Please choose: [1, 2]")
             return
         if group_num < 1:
             await edit_msg(
@@ -157,7 +157,7 @@ class UserAutoAssignment(commands.Cog):
         self,
         ctx: discord.ApplicationContext,
         category: discord.Option(
-            choices=["0", "1"],
+            choices=["1", "2"],
             # future: don't hardcode
             description="The category",
         ),
@@ -187,7 +187,7 @@ class UserAutoAssignment(commands.Cog):
             description="The user to set as a mentor",
         ),
         category: discord.Option(
-            choices=["0", "1"],
+            choices=["1", "2"],
             # future: don't hardcode
             description="The category",
         ),
