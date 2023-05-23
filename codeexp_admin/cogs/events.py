@@ -69,10 +69,10 @@ class EventHandlers(commands.Cog):
         if not message.guild:
             return
 
-        if message.content.startswith("/usermod"):
+        if message.content.startswith("/joingroup"):
             args = message.content.split(" ")
             if len(args) < 3:
-                await message.channel.send("Usage: /usermod <cat> <grp>")
+                await message.channel.send("Usage: /joingroup <cat> <grp>")
                 return
 
             if not args[1].isdigit():
