@@ -117,7 +117,7 @@ class UserAutoAssignment(commands.Cog):
     def __init__(self, bot: AdminBot):
         self.bot = bot
 
-    @commands.command(name="usermod")
+    @commands.command(name="joingroup")
     async def normie_join_group(
         self, ctx: discord.ApplicationContext, category: int, group_num: int
     ):
@@ -152,7 +152,7 @@ class UserAutoAssignment(commands.Cog):
             update_message=update_message,
         )
 
-    @commands.slash_command(name="usermod", description="Joins a group")
+    @commands.slash_command(name="joingroup", description="Joins a group")
     async def join_group(
         self,
         ctx: discord.ApplicationContext,
