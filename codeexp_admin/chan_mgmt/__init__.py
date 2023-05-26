@@ -66,6 +66,7 @@ async def create_managed_channels(
     *,
     engine: SqliteEngine,
     update_message: Optional[discord.Interaction],
+    channel_cat: str,
 ):
     last_group_num = get_last_grp_num(engine, category)
     for i in range(num_channels):
@@ -79,7 +80,7 @@ async def create_managed_channels(
         for gtype in ["txt", "vc"]:
             group_name = f"{prefix}-{category}-grp-{last_group_num + i + 1}-{gtype}"
             if gtype == "txt":
-                chan = await guild.create_text_channel(group_name)
+                chan = await guild.create_text_channel(group_name, category=discord.utils.get(guild.categories, name=channel_cat))
                 engine.cursor.execute(
                     """
                 INSERT INTO channel_store (discord_channel_id, discord_channel_name, channel_type, category_id,
@@ -100,7 +101,7 @@ async def create_managed_channels(
                 )
 
             elif gtype == "vc":
-                chan = await guild.create_voice_channel(group_name)
+                chan = await guild.create_voice_channel(group_name, category=discord.utils.get(guild.categories, name=channel_cat))
                 engine.cursor.execute(
                     """
                                 INSERT INTO channel_store (discord_channel_id, discord_channel_name, channel_type, category_id,

@@ -6,6 +6,8 @@ import discord
 # noinspection PyPackageRequirements
 from discord.ext import commands
 
+from discord.utils import get
+
 # noinspection PyPackageRequirements
 from discord.ext import bridge
 from discord import SlashCommandOptionType as ScOt
@@ -151,6 +153,8 @@ class UserAutoAssignment(commands.Cog):
             engine=self.bot.sqlite_engine,
             update_message=update_message,
         )
+        role = get(ctx.author.guild.roles, name="grouped")
+        await ctx.author.add_roles(role)
 
     @commands.slash_command(name="joingroup", description="Joins a group")
     async def join_group(
@@ -176,6 +180,8 @@ class UserAutoAssignment(commands.Cog):
             engine=self.bot.sqlite_engine,
             update_message=update_message,
         )
+        role = get(ctx.author.guild.roles, name="grouped")
+        await ctx.author.add_roles(role)
 
     @commands.slash_command(name="mentor", description="Assigns a user to be a mentor")
     @commands.has_permissions(manage_channels=True)
