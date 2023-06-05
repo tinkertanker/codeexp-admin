@@ -153,8 +153,9 @@ class UserAutoAssignment(commands.Cog):
             engine=self.bot.sqlite_engine,
             update_message=update_message,
         )
-        role = get(ctx.author.guild.roles, name="grouped")
-        await ctx.author.add_roles(role)
+        # TODO: Don't hardcode
+        # sets user to also have the 'joined' role
+        await ctx.author.add_roles(discord.utils.get(ctx.guild.roles, name="joined"))
 
     @commands.slash_command(name="joingroup", description="Joins a group")
     async def join_group(
@@ -180,18 +181,37 @@ class UserAutoAssignment(commands.Cog):
             engine=self.bot.sqlite_engine,
             update_message=update_message,
         )
-        role = get(ctx.author.guild.roles, name="grouped")
-        await ctx.author.add_roles(role)
+        # TODO: Don't hardcode
+        # sets user to also have the 'joined' role
+        await ctx.author.add_roles(discord.utils.get(ctx.guild.roles, name="joined"))
 
-    @commands.slash_command(name="mentor", description="Assigns a user to be a mentor")
+
+    @commands.slash_command(name="dstamentor", description="Assign yourself the mentor role - requires a secret password")
+    async def dstamentor(
+        self,
+        ctx: discord.ApplicationContext,
+        password
+    ):
+        if password == "PASSWORD":
+            usr: discord.Member = ctx.author
+            update_message = await ctx.respond("Success!", ephemeral=True)
+            # TODO: Don't hardcode
+            # sets user to have the 'mentor' role
+            await ctx.author.add_roles(discord.utils.get(ctx.guild.roles, name="dsta-mentor"))
+        else:
+            await ctx.respond("Invalid password!", ephemeral=True)
+
+
+    @commands.slash_command(name="mentor", description="Assigns a user to be a mentor of a specific group, requires the dsta-mentor role")
     @commands.has_permissions(manage_channels=True)
+
     async def mentor(
         self,
         ctx: discord.ApplicationContext,
-        user: discord.Option(
-            discord.SlashCommandOptionType.user,
-            description="The user to set as a mentor",
-        ),
+        # user: discord.Option(
+        #     discord.SlashCommandOptionType.user,
+        #     description="The user to set as a mentor",
+        # ),
         category: discord.Option(
             choices=["1", "2"],
             # future: don't hardcode
@@ -218,6 +238,12 @@ class UserAutoAssignment(commands.Cog):
                 ephemeral=True,
             )
             return
+        
+        role = discord.utils.get(ctx.guild.roles, name="dsta-mentor")
+        if role not in ctx.author.roles:
+            await ctx.respond(f"Only mentors can run this command!", ephemeral=True)
+            return
+
         role_id = role_id[0]
         the_role = ctx.guild.get_role(role_id)
         if the_role is None:
@@ -229,8 +255,8 @@ class UserAutoAssignment(commands.Cog):
                 ephemeral=True,
             )
             return
-        usr: discord.Member = user
-        await ctx.respond(f"Adding {str(user)} to {the_role.name}", ephemeral=True)
+        usr: discord.Member = ctx.author
+        await ctx.respond(f"Adding {str(ctx.author)} to {the_role.name}", ephemeral=True)
         await usr.add_roles(
             the_role, reason=f"codeexp_admin: User {ctx.author} " f"set as mentor"
         )

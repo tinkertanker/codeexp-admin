@@ -74,6 +74,7 @@ class GroupManagement(commands.Cog):
             discord.SlashCommandOptionType.integer, "The number of groups to create"
         ),
         channel_category: discord.Option(
+            # TODO: do not hardcode choices
             choices=["cat1-1-25", "cat1-26-30", "cat2-1-25", "cat2-26-50", "cat1-51-75", "cat1-76-92"],
             description="The name of the channel's category",
         )
