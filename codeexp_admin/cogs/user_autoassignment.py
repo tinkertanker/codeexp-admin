@@ -154,8 +154,8 @@ class UserAutoAssignment(commands.Cog):
             update_message=update_message,
         )
         # TODO: Don't hardcode
-        # sets user to also have the 'joined' role
-        await ctx.author.add_roles(discord.utils.get(ctx.guild.roles, name="joined"))
+        # sets user to also have the 'participant' role
+        await ctx.author.add_roles(discord.utils.get(ctx.guild.roles, name="participant"))
 
     @commands.slash_command(name="joingroup", description="Joins a group")
     async def join_group(

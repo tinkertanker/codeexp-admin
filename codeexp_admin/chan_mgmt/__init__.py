@@ -66,7 +66,6 @@ async def create_managed_channels(
     *,
     engine: SqliteEngine,
     update_message: Optional[discord.Interaction],
-    channel_cat: str,
 ):
     last_group_num = get_last_grp_num(engine, category)
     for i in range(num_channels):
@@ -77,10 +76,14 @@ async def create_managed_channels(
         role = await guild.create_role(
             name=f"{prefix}-{category}-grp-{last_group_num + i + 1}"
         )
+        category_name = f"{prefix}-{category}-grp-{last_group_num + i + 1}"
+        cat = await guild.create_category(category_name)
+        await cat.set_permissions(role, read_messages=True, send_messages=True, connect=True, speak=True,reason="Created by codeexp_admin")
+        await cat.set_permissions(guild.default_role, read_messages=False, connect=False, reason="Created by codeexp_admin")
         for gtype in ["txt", "vc"]:
             group_name = f"{prefix}-{category}-grp-{last_group_num + i + 1}-{gtype}"
             if gtype == "txt":
-                chan = await guild.create_text_channel(group_name, category=discord.utils.get(guild.categories, name=channel_cat))
+                chan = await guild.create_text_channel(group_name, category=cat)
                 engine.cursor.execute(
                     """
                 INSERT INTO channel_store (discord_channel_id, discord_channel_name, channel_type, category_id,
@@ -96,12 +99,9 @@ async def create_managed_channels(
                     ),
                 )
                 engine.connection.commit()
-                await chan.set_permissions(
-                    role, view_channel=True, reason="Created by codeexp_admin"
-                )
 
             elif gtype == "vc":
-                chan = await guild.create_voice_channel(group_name, category=discord.utils.get(guild.categories, name=channel_cat))
+                chan = await guild.create_voice_channel(group_name, category=cat)
                 engine.cursor.execute(
                     """
                                 INSERT INTO channel_store (discord_channel_id, discord_channel_name, channel_type, category_id,
@@ -117,9 +117,6 @@ async def create_managed_channels(
                     ),
                 )
                 engine.connection.commit()
-                await chan.set_permissions(
-                    role, view_channel=True, reason="Created by codeexp_admin"
-                )
     if update_message:
         await update_message.edit_original_message(
             content=f"Created {num_channels} channels"
