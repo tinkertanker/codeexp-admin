@@ -192,7 +192,7 @@ class UserAutoAssignment(commands.Cog):
         ctx: discord.ApplicationContext,
         password
     ):
-        if password == "PASSWORD":
+        if password == self.bot.cfg.mentor_role_password:
             usr: discord.Member = ctx.author
             update_message = await ctx.respond("Success!", ephemeral=True)
             # TODO: Don't hardcode

@@ -12,7 +12,7 @@ import sentry_sdk
 from codeexp_admin.sqlite_engine import SqliteEngine
 
 Config = namedtuple(
-    "Config", ["token", "guild", "mentor_role", "sentry_dsn", "member_role"]
+    "Config", ["token", "guild", "mentor_role", "mentor_role_password", "sentry_dsn", "member_role"]
 )
 
 

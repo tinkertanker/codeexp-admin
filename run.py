@@ -20,6 +20,10 @@ def main():
         logger.error("MENTOR_ROLE_ID environment variable not set")
         return
 
+    if not os.getenv("MENTOR_ROLE_PASSWORD"):
+        logger.error("MENTOR_ROLE_PASSWORD environment variable not set")
+        return
+
     if not os.getenv("SENTRY_DSN"):
         logger.warning(
             "Not running with sentry. You won't have easy access to error reports. Continuing anyway..."
@@ -29,6 +33,7 @@ def main():
         token=os.getenv("DISCORD_TOKEN"),
         guild=int(os.getenv("GUILD_ID")),
         mentor_role=int(os.getenv("MENTOR_ROLE_ID")),
+        mentor_role_password=os.getenv("MENTOR_ROLE_PASSWORD"),
         sentry_dsn=os.getenv("SENTRY_DSN"),
         member_role=os.getenv("MEMBER_ROLE_ID"),
     )
