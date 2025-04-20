@@ -183,7 +183,7 @@ class UserAutoAssignment(commands.Cog):
         )
         # TODO: Don't hardcode
         # sets user to also have the 'joined' role
-        await ctx.author.add_roles(discord.utils.get(ctx.guild.roles, name="joined"))
+        await ctx.author.add_roles(discord.utils.get(ctx.guild.roles, name="verified"))
 
 
     @commands.slash_command(name="dstamentor", description="Assign yourself the mentor role - requires a secret password")
@@ -266,6 +266,7 @@ class UserAutoAssignment(commands.Cog):
         self, ctx: discord.ApplicationContext, error: Exception
     ):
         if isinstance(error, commands.MissingPermissions):
+            self.bot.logger.error("Error because of missing perms")
             await ctx.respond(str(error), ephemeral=True)
             return
         self.bot.logger.error(error)
